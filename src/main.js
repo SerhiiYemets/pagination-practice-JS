@@ -24,7 +24,7 @@ const loadMore = document.querySelector(".js-load-more");
 
 loadMore.addEventListener("click", onLoadMore);
 
-let page = 499;
+let page = 1;
 
 async function serviceMovie(page = 1) {
     const { data } = await axios.get(`${BASE_URL}${END_POINT}`, {
