@@ -22,20 +22,32 @@ const API_KEY = "345007f9ab440e5b86cef51be6397df1";
 const container = document.querySelector(".js-movie-list");
 const loadMore = document.querySelector(".js-load-more");
 
+loadMore.addEventListener("click", onLoadMore);
+
+let page = 499;
+
 async function serviceMovie(page = 1) {
-    const { data } = await axios(`${BASE_URL}${END_POINT}`, {
+    const { data } = await axios.get(`${BASE_URL}${END_POINT}`, {
         params: {
-            api_key: API_KEY
+            api_key: API_KEY,
+            page
+        },
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyZjU2NGJhNDBkMTk3OWY0YzFmMzE2NmQzNmFiMTdjNSIsIm5iZiI6MTc2MTQ5MzExMC45MTM5OTk4LCJzdWIiOiI2OGZlNDA3NjI4MjFiZWZkNzZlYWFlY2MiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.vbylhF6rwMOYEqlP0Cl-z6-U5SxCWucPy_OsRQDkPww'
         }
-    })
-    
+    });
     return data;
 }
 
-serviceMovie()
+serviceMovie(page)
     .then((data) => {
         console.log(data);
         container.insertAdjacentHTML("beforeend", createMarkup(data.results));
+
+        if (data.page < data.total_pages) {
+            loadMore.classList.replace("load-more-hidden", "load-more");
+        }
     })
     .catch((error) => {
         alert(error.message);
@@ -52,4 +64,23 @@ function createMarkup(arr) {
             </div>
         </li>
     `).join("");
+}
+async function onLoadMore() {
+    page++;
+    loadMore.disabled = true;
+
+    try {
+        const data = await serviceMovie(page);
+        console.log(data);
+        container.insertAdjacentHTML("beforeend", createMarkup(data.results))
+        
+        if (data.page >= data.total_pages) {
+            loadMore.classList.replace( "load-more", "load-more-hidden");
+        }
+
+    } catch (error) {
+        alert(error.message)
+    } finally {
+        loadMore.disabled = false;
+    }
 }
